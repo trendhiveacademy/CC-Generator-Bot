@@ -89,6 +89,24 @@ def gen(update: Update, context: CallbackContext):
     except Exception as e:
         update.message.reply_text(f"⚠️ Error: {e}")
 
+# /help command handler
+def help_command(update: Update, context: CallbackContext):
+    help_text = (
+        "🤖 *Fake CC Generator Bot Help*\n\n"
+        "📌 *Usage Format:*\n"
+        "`/gen <BIN>` – Generate 5 cards\n"
+        "`/gen <BIN> <Quantity>` – Generate multiple cards\n"
+        "`/gen <BIN|MM|YY> <Quantity>` – Custom expiry date\n\n"
+        "📍 *Example Commands:*\n"
+        "`/gen 414720`\n"
+        "`/gen 414720 10`\n"
+        "`/gen 414720|12|26 5`\n\n"
+        "👑 *Owner:* @trendhiveacademy\n"
+        "🎬 *Subscribe me on YouTube:* [Click Here](https://www.youtube.com/@trendhiveacademy)\n\n"
+        "⚠️ *Note:* This bot is for educational purposes only!"
+    )
+    update.message.reply_text(help_text, parse_mode="Markdown", disable_web_page_preview=True)
+
 # Start Bot
 def main():
     print("Starting bot...")
@@ -96,6 +114,7 @@ def main():
         updater = Updater("7613257509:AAE-H2p7U-KSVNWTCg-EtXKIjKGUKh3mA5Q", use_context=True)
         dp = updater.dispatcher
         dp.add_handler(CommandHandler("gen", gen))
+        dp.add_handler(CommandHandler("help", help_command))  # Register /help command
         updater.start_polling()
         print("✅ Bot is polling...", flush=True)
         updater.idle()
