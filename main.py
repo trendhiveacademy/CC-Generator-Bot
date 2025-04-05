@@ -32,7 +32,6 @@ def generate_cc(bin_code, month=None, year=None):
             if luhn_checksum(full_card):
                 break
 
-        # Set month/year
         exp_month = month if month else str(random.randint(1, 12)).zfill(2)
         current_year = datetime.datetime.now().year % 100
         exp_year = year if year else str(random.randint(current_year + 1, current_year + 5)).zfill(2)
@@ -40,7 +39,7 @@ def generate_cc(bin_code, month=None, year=None):
 
         return f"{full_card} | {exp_month}/{exp_year} | CVV: {cvv}"
 
-# Get BIN details (country, brand, etc.)
+# Get BIN info
 def get_bin_info(bin_number):
     try:
         response = requests.get(BIN_LOOKUP_URL.format(bin_number))
@@ -57,7 +56,24 @@ def get_bin_info(bin_number):
     except Exception:
         return "⚠️ Failed to fetch BIN info."
 
-# /gen command handler
+# Reusable help text
+def get_help_text():
+    return (
+        "🤖 *Fake CC Generator Bot Help*\n\n"
+        "📌 *Usage Format:*\n"
+        "`/gen <BIN>` – Generate 5 cards\n"
+        "`/gen <BIN> <Quantity>` – Generate multiple cards\n"
+        "`/gen <BIN|MM|YY> <Quantity>` – Custom expiry date\n\n"
+        "📍 *Example Commands:*\n"
+        "`/gen 414720`\n"
+        "`/gen 414720 10`\n"
+        "`/gen 414720|12|26 5`\n\n"
+        "👑 *Owner:* @trendhiveacademy\n"
+        "🎬 *Subscribe me on YouTube:* [Click Here](https://www.youtube.com/@trendhiveacademy)\n\n"
+        "⚠️ *Note:* This bot is for educational purposes only!"
+    )
+
+# /gen command
 def gen(update: Update, context: CallbackContext):
     try:
         if len(context.args) == 0:
@@ -78,33 +94,13 @@ def gen(update: Update, context: CallbackContext):
             update.message.reply_text("🚫 Max limit is 20 cards at once.")
             return
 
-        # BIN Info
         bin_info = get_bin_info(bin_code)
-
-        # Generate Cards
         cards = [generate_cc(bin_code, month, year) for _ in range(quantity)]
         card_text = "\n".join(cards)
 
         update.message.reply_text(f"{bin_info}\n\n💳 Generated {quantity} Fake CCs:\n\n{card_text}")
     except Exception as e:
         update.message.reply_text(f"⚠️ Error: {e}")
-
-# Help text used by both /help and /start
-def get_help_text():
-    return (
-        "🤖 *Fake CC Generator Bot Help*\n\n"
-        "📌 *Usage Format:*\n"
-        "`/gen <BIN>` – Generate 5 cards\n"
-        "`/gen <BIN> <Quantity>` – Generate multiple cards\n"
-        "`/gen <BIN|MM|YY> <Quantity>` – Custom expiry date\n\n"
-        "📍 *Example Commands:*\n"
-        "`/gen 414720`\n"
-        "`/gen 414720 10`\n"
-        "`/gen 414720|12|26 5`\n\n"
-        "👑 *Owner:* @trendhiveacademy\n"
-        "🎬 *Subscribe me on YouTube:* [Click Here](https://www.youtube.com/@trendhiveacademy)\n\n"
-        "⚠️ *Note:* This bot is for educational purposes only!"
-    )
 
 # /help command
 def help_command(update: Update, context: CallbackContext):
@@ -114,15 +110,17 @@ def help_command(update: Update, context: CallbackContext):
 def start_command(update: Update, context: CallbackContext):
     update.message.reply_text(get_help_text(), parse_mode="Markdown", disable_web_page_preview=True)
 
-# Start Bot
+# Main bot function
 def main():
     print("Starting bot...")
     try:
         updater = Updater("7613257509:AAE-H2p7U-KSVNWTCg-EtXKIjKGUKh3mA5Q", use_context=True)
         dp = updater.dispatcher
+
         dp.add_handler(CommandHandler("gen", gen))
         dp.add_handler(CommandHandler("help", help_command))
         dp.add_handler(CommandHandler("start", start_command))
+
         updater.start_polling()
         print("✅ Bot is polling...", flush=True)
         updater.idle()
